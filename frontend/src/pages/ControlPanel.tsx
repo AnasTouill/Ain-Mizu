@@ -47,7 +47,8 @@ export default function ControlPanel() {
   const cmd = useMutation({
     mutationFn: ({ path, body }: { path: string; body: unknown }) => api.controlPut(fid, path, body),
     onSuccess: (data) => {
-      qc.setQueryData(['control', fid], data);
+      if (data && data.farm_id) qc.setQueryData(['control', fid], data);
+      else qc.invalidateQueries({ queryKey: ['control', fid] });
       qc.invalidateQueries({ queryKey: ['control-log', fid] });
       qc.invalidateQueries({ queryKey: ['farm'] });
     },
@@ -69,7 +70,21 @@ export default function ControlPanel() {
     <div className="mx-auto flex min-h-full max-w-[1680px] flex-col gap-3 p-3 pb-10 lg:h-full lg:min-h-0">
       <header className="flex shrink-0 flex-wrap items-center gap-3">
         <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-white"><Gauge className="text-water-300" /> {t('nav.control')} · {farm.name}</h1>
-        <span className="chip ms-auto border-emerald-400/30 text-emerald-200"><Radio size={12} /> {t('ctl.hw', { a: c.hardware.adapter })}</span>
+        <span className={`chip ms-auto ${c.hardware.adapter === 'esp32' ? (c.hardware.connected ? 'border-emerald-400/40 text-emerald-200' : 'border-amber-400/40 text-amber-200') : 'border-emerald-400/30 text-emerald-200'}`}>
+          <Radio size={12} />
+          {c.hardware.adapter === 'esp32'
+            ? c.hardware.connected
+              ? t('ctl.boardOn', { s: c.hardware.age_s ?? 0, tank: c.hardware.tank_pct ?? '–' })
+              : t('ctl.boardWait')
+            : t('ctl.hw', { a: c.hardware.adapter })}
+        </span>
+        <button
+          disabled={busy}
+          onClick={() => cmd.mutate({ path: 'board', body: { linked: c.hardware.adapter !== 'esp32' } })}
+          className="btn-ghost text-xs"
+        >
+          <Cpu size={13} /> {c.hardware.adapter === 'esp32' ? t('ctl.boardUnlink') : t('ctl.boardLink')}
+        </button>
       </header>
 
       <div className="grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-[300px_minmax(0,1fr)_340px]">
@@ -214,6 +229,11 @@ export default function ControlPanel() {
                         {r.recommended && <span className="ms-1 rounded bg-emerald-500/20 px-1 text-emerald-200">{t('ctl.recommended')}</span>}
                         {r.enabled && r.needs_water && !r.reachable && <span className="ms-1 text-amber-300">{t('farm.unreachable')}</span>}
                         {r.flow_m3_h > 0 && <span className="ms-1 text-water-200">{fmtNumber(r.flow_m3_h, lang, 1)} m³/h</span>}
+                        {r.board_channel && (
+                          <span className="ms-1 rounded bg-cyan-500/15 px-1 text-cyan-200">
+                            ESP32 V{r.board_channel}{r.sensor_moisture_pct !== null && r.sensor_moisture_pct !== undefined ? ` · ${t('ctl.sensor', { v: r.sensor_moisture_pct })}` : ''}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <Switch on={r.enabled} disabled={busy} label={r.label} onChange={() => cmd.mutate({ path: `routes/${r.sub_zone_id}`, body: { enabled: !r.enabled } })} />

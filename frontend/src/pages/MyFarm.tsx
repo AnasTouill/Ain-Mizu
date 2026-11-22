@@ -300,6 +300,7 @@ export default function MyFarm() {
             {fields.map(({ properties: p }) => {
               const classified = p.is_irrigated && p.stress_class !== null;
               const color = classified ? colors[p.stress_class as number] : NA_COLOR;
+              const outlineColor = classified && !p.needs_water ? '#94a3b8' : color;
               const isSel = selected === p.field_id;
               return (
                 <motion.div
@@ -307,7 +308,7 @@ export default function MyFarm() {
                   layout
                   onClick={() => setSelected(isSel ? null : p.field_id)}
                   className={`glass cursor-pointer border-s-4 p-3.5 transition ${isSel ? 'ring-2 ring-white/60' : 'hover:bg-white/[0.06]'}`}
-                  style={{ borderInlineStartColor: color }}
+                  style={{ borderInlineStartColor: outlineColor }}
                 >
                   <div className="flex items-center gap-3">
                     <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full" style={{ background: `${color}2a`, color }}>

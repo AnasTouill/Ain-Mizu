@@ -14,7 +14,7 @@ export default function Login() {
   const t = useT();
   const lang = useAppStore((s) => s.lang);
   const setAuth = useAuth((s) => s.setAuth);
-  const [tab, setTab] = useState<'login' | 'register'>('login');
+  const [tab, setTab] = useState<'login' | 'register'>(window.location.hash.includes('register') ? 'register' : 'login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,6 +42,7 @@ export default function Login() {
         <div className="mb-5 flex items-center gap-3">
           <Logo size={44} />
           <div>
+            <div className="font-display text-xs font-bold tracking-[0.18em] text-water-300">AIN-MIZU</div>
             <h1 className="font-display text-2xl font-bold text-white">{t('auth.title')}</h1>
             <p className="text-sm text-slate-400">{t('auth.subtitle')}</p>
           </div>

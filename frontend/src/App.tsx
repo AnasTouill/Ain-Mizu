@@ -27,11 +27,13 @@ const ModelPlan = lazy(() => import('./pages/ModelPlan'));
 const Login = lazy(() => import('./pages/Login'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const FarmProfile = lazy(() => import('./pages/FarmProfile'));
+const Home = lazy(() => import('./pages/Home'));
 const FarmStats = lazy(() => import('./pages/FarmStats'));
 const ControlPanel = lazy(() => import('./pages/ControlPanel'));
 const EditFarm = lazy(() => import('./pages/EditFarm'));
 
-const PAGES: Record<Route, React.LazyExoticComponent<(props: never) => JSX.Element>> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const PAGES: Record<Route, React.LazyExoticComponent<React.ComponentType<any>>> = {
   farm: MyFarm,
   dashboard: Dashboard,
   network: NetworkLab,
@@ -42,6 +44,7 @@ const PAGES: Record<Route, React.LazyExoticComponent<(props: never) => JSX.Eleme
   login: Login,
   onboarding: Onboarding,
   profile: FarmProfile,
+  home: Home,
   stats: FarmStats,
   control: ControlPanel,
   edit: EditFarm,
@@ -77,6 +80,10 @@ export default function App() {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   }, [lang]);
+  // farmer side = AIN MIZU light theme; the technical (expert) screens stay dark
+  useEffect(() => {
+    document.documentElement.classList.toggle('theme-light', mode === 'farmer');
+  }, [mode]);
 
   // initialise month / zone from config.json once it is loaded
   useEffect(() => {
@@ -96,13 +103,13 @@ export default function App() {
   // Farmer mode: only "My farm" (or the farm picker) and "About". Expert mode: the zone-wide screens.
   // Farmer mode: login -> onboarding (until the farm is saved) -> my farm. Expert mode: zone-wide screens.
   const farmerPage = (): Route | 'picker' => {
-    if (route === 'about') return 'about';
-    if (!token || !user) return 'login';
+    if (route === 'about' || route === 'home') return route;
+    if (!token || !user) return route === 'login' ? 'login' : 'home';
     if (!user.farm_ids.length || route === 'onboarding') return 'onboarding';
     if (route === 'stats' || route === 'control' || route === 'edit') return route;
     return 'profile';
   };
-  const expertOnly: Route[] = ['farm', 'login', 'onboarding', 'profile', 'stats', 'control', 'edit'];
+  const expertOnly: Route[] = ['home', 'farm', 'login', 'onboarding', 'profile', 'stats', 'control', 'edit'];
   const pageKey = mode === 'farmer' ? farmerPage() : expertOnly.includes(route) ? 'dashboard' : route;
   const Page = pageKey === 'picker' ? FarmPicker : PAGES[pageKey as Route];
   return (

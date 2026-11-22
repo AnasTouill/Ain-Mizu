@@ -18,7 +18,7 @@ export function BootScreen() {
           <Logo size={96} />
         </div>
         <div className="font-display text-3xl font-bold text-white">
-          Physarum<span className="text-slime-400 text-glow-gold">-Grid</span>
+          AIN-<span className="text-water-300">MIZU</span>
         </div>
         <div className="flex items-center gap-2 text-sm text-slate-400">
           <span className="relative flex h-2 w-2">

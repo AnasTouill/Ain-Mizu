@@ -7,7 +7,7 @@ import { api } from '../api/client';
 import { useConfig, useFarmPlan } from '../api/hooks';
 import { NetworkLayer } from '../components/map/NetworkLayer';
 import { ObstacleLayer, ObstacleLegend } from '../components/onboarding/ObstacleLayer';
-import { BarChart3, Gauge, Mountain, Pencil } from 'lucide-react';
+import { BarChart3, ChevronDown, Gauge, Mountain, Pencil } from 'lucide-react';
 import { ClassIcon } from '../components/ClassIcon';
 import type { NetworkResponse, StressClass } from '../types';
 import { BaseTiles, CATEGORY_COLORS, FitTo, ll, optLabel, OutsideMask } from '../components/onboarding/farmMap';
@@ -42,6 +42,7 @@ export default function FarmProfile() {
   const [satellite, setSatellite] = useState(true);
   const [byStress, setByStress] = useState(true);
   const [obstacles, setObstacles] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   const farms = useQuery({ queryKey: ['my-farms'], queryFn: api.myFarms });
   const opts = useQuery({ queryKey: ['onboarding-options'], queryFn: api.onboardingOptions, staleTime: Infinity });
   const farm = farms.data?.[farms.data.length - 1];
@@ -68,7 +69,7 @@ export default function FarmProfile() {
       <div className="flex flex-col gap-3 lg:min-h-0">
         <Panel>
           <div className="flex flex-wrap items-start gap-3">
-            <div className="min-w-0 flex-1">
+            <div className="min-w-[10rem] flex-1">
               <div className="label">{zoneName}</div>
               <h1 className="font-display text-2xl font-bold text-white">{farm.name}</h1>
             </div>
@@ -78,7 +79,48 @@ export default function FarmProfile() {
               <button onClick={() => { window.location.hash = '/control'; }} className="btn-ghost min-w-0 px-2 text-xs"><Gauge size={14} /> {t('nav.control')}</button>
             </div>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 text-center sm:grid-cols-3">
+          {plan.data && (
+            <div
+              className="mt-3 flex flex-wrap items-center gap-3 rounded-2xl p-3"
+              style={{ background: plan.data.summary.fields_need_water ? 'rgba(214,40,40,0.08)' : 'rgba(45,106,79,0.10)' }}
+            >
+              <div
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-white"
+                style={{ background: plan.data.summary.fields_need_water ? '#d62828' : '#2d6a4f' }}
+              >
+                <Droplets size={20} />
+              </div>
+              <div className="min-w-[12rem] flex-1">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('todo.title')}</div>
+                <div className="font-display text-base font-bold text-white">
+                  {plan.data.summary.fields_need_water
+                    ? t('todo.water', { n: plan.data.summary.fields_need_water, m3: fmtNumber(plan.data.summary.total_need_m3_day, lang), when: hourRanges(plan.data.summary.irrigation_hours) })
+                    : t('todo.none')}
+                </div>
+              </div>
+              {plan.data.summary.fields_need_water > 0 && (
+                <button onClick={() => { window.location.hash = '/control'; }} className="btn-primary px-4 text-sm">
+                  <Gauge size={15} /> {t('todo.go')}
+                </button>
+              )}
+            </div>
+          )}
+          <button
+            onClick={() => setShowStats((v) => !v)}
+            aria-expanded={showStats}
+            className="mt-3 flex w-full items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-start text-sm text-slate-200 hover:bg-white/10"
+          >
+            <BarChart3 size={14} className="text-water-300" />
+            <span className="font-semibold">{t('profile.summary')}</span>
+            {!showStats && plan.data && (
+              <span className="truncate text-xs text-slate-400">
+                · {plan.data.summary.fields_need_water}/{plan.data.summary.fields_total} {t('farm.kpi.toWater').toLowerCase()} · {fmtNumber(plan.data.summary.total_need_m3_day, lang)} m³
+              </span>
+            )}
+            <ChevronDown size={16} className={`ms-auto shrink-0 text-slate-400 transition-transform ${showStats ? 'rotate-180' : ''}`} />
+          </button>
+          {showStats && (
+          <div className="mt-2 grid grid-cols-2 gap-2 text-center sm:grid-cols-3">
             <Stat icon={<Ruler size={14} />} v={`${fmtNumber(farm.area_ha, lang, 1)} ha`} k={t('onb.area')} />
             <Stat icon={<Sprout size={14} />} v={String(farm.sub_zones.length)} k={t('onb.step2')} />
             <Stat icon={<Droplets size={14} />} v={`${fmtNumber(farm.need_m3_year / 1000, lang, 0)}k m³`} k={t('profile.need')} />
@@ -90,6 +132,7 @@ export default function FarmProfile() {
               </>
             )}
           </div>
+          )}
         </Panel>
 
         <section className="glass relative h-[52vh] min-h-[360px] overflow-hidden lg:h-auto lg:min-h-0 lg:flex-1">
@@ -142,7 +185,7 @@ export default function FarmProfile() {
               const st = subState.get(s.sub_zone_id);
               const stressColor = st?.stress_class === null || st?.stress_class === undefined ? '#64748b' : config.class_colors[st.stress_class];
               return (
-                <li key={s.sub_zone_id} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                <li key={s.sub_zone_id} className="rounded-xl border bg-white/5 p-3" style={{ borderColor: stressColor }}>
                   <div className="flex items-center gap-2">
                     <span className="h-3 w-3 shrink-0 rounded-sm" style={{ background: CATEGORY_COLORS[s.category] }} />
                     <span className="min-w-0 flex-1 font-semibold text-white">{s.name}</span>

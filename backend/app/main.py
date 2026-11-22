@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 
 from .config import CORS_ORIGINS
 from .errors import BadRequest, DataMissing, NotFound
-from .routers import actuation, auth, energy, farmers, farms, fields, kpis, meta, model, network, predictions, zones
+from .routers import actuation, auth, energy, farmers, farms, fields, hardware, kpis, meta, model, network, predictions, zones
 
 DESCRIPTION = """
 Decision support for farmers in Kairouan, Sidi Bouzid and Kebili: **see** (Sentinel-2) ->
@@ -54,10 +54,13 @@ async def _validation(_: Request, exc: RequestValidationError) -> JSONResponse:
     return _error(422, "; ".join(parts) or "Invalid request")
 
 
-for module in (meta, auth, farms, zones, farmers, fields, predictions, network, energy, kpis, actuation, model):
+for module in (meta, auth, farms, hardware, zones, farmers, fields, predictions, network, energy, kpis, actuation, model):
     app.include_router(module.router)
 
 
 @app.get("/", include_in_schema=False)
 def root() -> RedirectResponse:
     return RedirectResponse("/docs")
+
+# The ESP32 sketch sometimes gets PLATFORM_URL pasted with a trailing "/docs": accept that path too.
+app.add_api_route("/docs/api/hardware/board/report", hardware.board_report, methods=["POST"], include_in_schema=False)

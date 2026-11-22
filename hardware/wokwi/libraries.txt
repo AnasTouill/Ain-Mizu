@@ -1,0 +1,3 @@
+# Wokwi Library Manager (installed automatically when this file is in the project)
+LiquidCrystal I2C
+Adafruit NeoPixel

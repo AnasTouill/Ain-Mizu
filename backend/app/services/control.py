@@ -63,7 +63,46 @@ class VirtualAdapter(HardwareAdapter):
         return {"adapter": self.name, "connected": True, "devices": len(self.devices.get(farm_id, {}))}
 
 
-ADAPTERS: dict[str, HardwareAdapter] = {"virtual": VirtualAdapter()}
+class Esp32BoardAdapter(HardwareAdapter):
+    """A real (or Wokwi-simulated) ESP32 board that polls POST /api/hardware/board/report every 2 s.
+
+    Commands are not pushed: the board pulls the wanted pump / valve state in the reply, and sends
+    its moisture sensors and tank level in the request. The board is "connected" while its last
+    report is recent."""
+
+    name = "esp32"
+    TIMEOUT_S = 10
+
+    def set_pump(self, farm_id: str, on: bool) -> None:  # applied at the next poll
+        pass
+
+    def set_valve(self, farm_id: str, valve_id: str, open_: bool) -> None:
+        pass
+
+    def status(self, farm_id: str) -> dict:
+        b = board_binding()
+        if b.get("farm_id") != farm_id or not b.get("last_seen"):
+            return {"adapter": self.name, "connected": False, "devices": 0}
+        age = (_now() - datetime.fromisoformat(b["last_seen"])).total_seconds()
+        return {"adapter": self.name, "connected": age <= self.TIMEOUT_S, "last_seen": b["last_seen"],
+                "age_s": round(age), "tank_pct": b.get("tank"), "moisture_pct": b.get("moisture"), "devices": 6}
+
+
+ADAPTERS: dict[str, HardwareAdapter] = {"virtual": VirtualAdapter(), "esp32": Esp32BoardAdapter()}
+BOARD_FILE = DATA_DIR / "hardware_board.json"
+BOARD_VALVES = 4
+
+
+def board_binding() -> dict:
+    with _lock:
+        if not BOARD_FILE.exists():
+            return {}
+        return json.loads(BOARD_FILE.read_text(encoding="utf-8"))
+
+
+def save_binding(b: dict) -> None:
+    with _lock:
+        write_json_atomic(BOARD_FILE, b)
 
 
 def adapter_for(state: dict) -> HardwareAdapter:
@@ -192,6 +231,12 @@ def view(state: dict, plan: dict) -> dict:
         if not r["enabled"] and r["stress_class"] == 3:
             warnings.append({"code": "red_off", "message": f"{r['label']} est en rouge mais son arrosage est coupé", "sub_zone_id": r["sub_zone_id"]})
     hours_to_need = sum(r["need_m3_day"] for r in served) / PUMP_FLOW_M3_H if served else 0.0
+    b = board_binding()
+    if b.get("farm_id") == state["farm_id"]:  # sensors of the ESP32 board: parcel n = board channel n
+        for i, r in enumerate(routes[:BOARD_VALVES]):
+            r["board_channel"] = i + 1
+            m = (b.get("moisture") or [])
+            r["sensor_moisture_pct"] = m[i] if i < len(m) else None
     return {
         "farm_id": state["farm_id"],
         "mode": state["mode"],
@@ -204,7 +249,7 @@ def view(state: dict, plan: dict) -> dict:
         "live": {"flow_m3_h": flow, "delivered_m3_today": state["delivered_m3_today"],
                  "need_m3_today": sum(r["need_m3_day"] for r in served),
                  "pumping_hours_needed": round(hours_to_need, 1)},
-        "hardware": adapter_for(state).status(state["farm_id"]) | {"adapter": (state.get("hardware") or {}).get("adapter", "virtual")},
+        "hardware": adapter_for(state).status(state["farm_id"]),
         "warnings": warnings,
         "network": {"sources": plan["sources"], "edges": plan["routes"], "boundary": plan.get("boundary"),
                     "fields": plan["fields"], "bbox": plan["bbox"]},

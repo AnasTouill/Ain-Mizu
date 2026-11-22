@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BarChart3, CalendarCheck, Cpu, Gauge, Home, LogOut, Info, Languages, LayoutDashboard, MapPin, Sprout, Sun, UserCog, Waypoints, type LucideIcon } from 'lucide-react';
+import { BarChart3, Sparkles, CalendarCheck, Cpu, Gauge, Home, LogOut, Info, Languages, LayoutDashboard, MapPin, Sprout, Sun, UserCog, Waypoints, type LucideIcon } from 'lucide-react';
 import { useConfig } from '../../api/hooks';
 import { LANGS, useT, type TKey } from '../../i18n';
 import type { Route } from '../../lib/router';
@@ -17,6 +17,7 @@ const EXPERT_NAV: NavItem[] = [
   { id: 'about', icon: Info, label: 'nav.about' },
 ];
 const FARMER_NAV: NavItem[] = [
+  { id: 'home', icon: Sparkles, label: 'nav.home' },
   { id: 'profile', icon: Home, label: 'nav.myFarm' },
   { id: 'stats', icon: BarChart3, label: 'nav.stats' },
   { id: 'control', icon: Gauge, label: 'nav.control' },
@@ -68,7 +69,7 @@ export function TopBar({ route, onNavigate }: { route: Route; onNavigate: (r: Ro
   const farmerMode = mode === 'farmer';
   const authUser = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);
-  const items = farmerMode ? (authUser?.farm_ids.length ? FARMER_NAV : FARMER_NAV.filter((n) => n.id === 'about')) : EXPERT_NAV;
+  const items = farmerMode ? (authUser?.farm_ids.length ? FARMER_NAV : FARMER_NAV.filter((n) => n.id === 'about' || n.id === 'home')) : EXPERT_NAV;
   const switchMode = () => {
     setMode(farmerMode ? 'expert' : 'farmer');
     onNavigate(farmerMode ? 'dashboard' : 'profile');
@@ -81,9 +82,8 @@ export function TopBar({ route, onNavigate }: { route: Route; onNavigate: (r: Ro
           <Logo size={38} />
           <div className="leading-tight">
             <div className="font-display text-lg font-bold tracking-tight text-white">
-              Physarum<span className="text-slime-400 text-glow-gold">-Grid</span>
+              AIN-<span className="text-water-300">MIZU</span>
             </div>
-            <div className="hidden text-[11px] text-slate-400 md:block">{t('app.tagline')}</div>
           </div>
         </a>
 
@@ -92,6 +92,11 @@ export function TopBar({ route, onNavigate }: { route: Route; onNavigate: (r: Ro
         </nav>
 
         <div className="ms-auto flex items-center gap-2">
+          {farmerMode && !authUser && (
+            <button onClick={() => onNavigate('login')} className="btn-primary px-4 py-1.5 text-xs">
+              {t('auth.login')}
+            </button>
+          )}
           {farmerMode && authUser && (
             <button
               onClick={() => { logout(); setFarmer(null); onNavigate('login'); }}
