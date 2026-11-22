@@ -66,14 +66,14 @@ export default function ControlPanel() {
   const setSchedule = (slots: { start: string; minutes: number }[]) => cmd.mutate({ path: 'schedule', body: { slots } });
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-3 p-3 pb-10">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="mx-auto flex min-h-full max-w-[1680px] flex-col gap-3 p-3 pb-10 lg:h-full lg:min-h-0">
+      <header className="flex shrink-0 flex-wrap items-center gap-3">
         <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-white"><Gauge className="text-water-300" /> {t('nav.control')} · {farm.name}</h1>
         <span className="chip ms-auto border-emerald-400/30 text-emerald-200"><Radio size={12} /> {t('ctl.hw', { a: c.hardware.adapter })}</span>
-      </div>
+      </header>
 
-      <div className="grid gap-3 lg:grid-cols-[380px_1fr]">
-        <div className="flex flex-col gap-3">
+      <div className="grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-[300px_minmax(0,1fr)_340px]">
+        <aside className="order-2 flex flex-col gap-3 lg:order-1 lg:min-h-0 lg:overflow-y-auto lg:pe-1">
           {/* pump */}
           <Panel title={t('ctl.pump')} icon={<Power size={14} />}>
             <div className="flex items-center gap-4">
@@ -140,11 +140,24 @@ export default function ControlPanel() {
               <button onClick={() => setSchedule([...schedule, { start: '12:00', minutes: 60 }])} className="btn-ghost w-full text-xs"><Plus size={13} /> {t('ctl.addSlot')}</button>
             </div>
           </Panel>
-        </div>
 
-        <div className="flex flex-col gap-3">
+          <Panel title={t('ctl.log')} icon={<Cpu size={14} />} className="max-h-[120px] shrink-0 !p-2">
+            <ul className="thin-scroll max-h-[64px] space-y-1 overflow-y-auto text-xs">
+              {(logQ.data ?? []).map((l, i) => (
+                <li key={i} className="flex gap-2 border-b border-white/5 pb-1">
+                  <span className="font-mono text-slate-500">{time(l.ts)}</span>
+                  <span className="text-slate-200">{t(`ctl.act.${l.action}` as 'ctl.act.pump_on', {}) ?? l.action}</span>
+                  <span className="truncate text-slate-500">{Object.values(l.detail ?? {}).filter((v) => typeof v !== 'object').join(' ')}</span>
+                </li>
+              ))}
+              {!logQ.data?.length && <li className="text-slate-500">{t('ctl.noLog')}</li>}
+            </ul>
+          </Panel>
+        </aside>
+
+        <main className="order-1 flex min-h-0 flex-col gap-3 lg:order-2">
           {/* map: click a pipe to close / open its valve */}
-          <div className="glass relative h-[48vh] min-h-[340px] overflow-hidden">
+          <div className="glass relative h-[60vh] min-h-[400px] overflow-hidden lg:h-auto lg:min-h-0 lg:flex-1">
             <MapContainer center={[farm.bounds[0][0], farm.bounds[0][1]]} zoom={14} zoomControl={false} className="h-full w-full" scrollWheelZoom>
               <BaseTiles satellite={satellite} />
               <ZoomControl position="bottomright" />
@@ -185,47 +198,33 @@ export default function ControlPanel() {
             </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
-            {/* routes */}
-            <Panel title={t('ctl.routes')} icon={<Droplets size={14} />}>
-              <div className="thin-scroll max-h-72 space-y-1.5 overflow-y-auto pe-1">
-                {c.routes.map((r: any) => {
-                  const color = r.stress_class === null ? '#64748b' : config.class_colors[r.stress_class];
-                  return (
-                    <div key={r.route_id} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-2 text-sm" style={{ borderInlineStartColor: color, borderInlineStartWidth: 4 }}>
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate font-semibold text-white">{r.label} <span className="text-xs font-normal text-slate-400">· {crop(r.crop)}</span></div>
-                        <div className="text-[11px] text-slate-400">
-                          {r.needs_water ? `${fmtNumber(r.need_m3_day, lang)} m³/j` : t('farm.noNeed')}
-                          {r.recommended && <span className="ms-1 rounded bg-emerald-500/20 px-1 text-emerald-200">{t('ctl.recommended')}</span>}
-                          {r.enabled && r.needs_water && !r.reachable && <span className="ms-1 text-amber-300">{t('farm.unreachable')}</span>}
-                          {r.flow_m3_h > 0 && <span className="ms-1 text-water-200">{fmtNumber(r.flow_m3_h, lang, 1)} m³/h</span>}
-                        </div>
-                      </div>
-                      <Switch on={r.enabled} disabled={busy} label={r.label} onChange={() => cmd.mutate({ path: `routes/${r.sub_zone_id}`, body: { enabled: !r.enabled } })} />
-                    </div>
-                  );
-                })}
-              </div>
-            </Panel>
+        </main>
 
-            {/* log */}
-            <Panel title={t('ctl.log')} icon={<Cpu size={14} />}>
-              <ul className="thin-scroll max-h-72 space-y-1 overflow-y-auto text-xs">
-                {(logQ.data ?? []).map((l, i) => (
-                  <li key={i} className="flex gap-2 border-b border-white/5 pb-1">
-                    <span className="font-mono text-slate-500">{time(l.ts)}</span>
-                    <span className="text-slate-200">{t(`ctl.act.${l.action}` as 'ctl.act.pump_on', {}) ?? l.action}</span>
-                    <span className="truncate text-slate-500">{Object.values(l.detail ?? {}).filter((v) => typeof v !== 'object').join(' ')}</span>
-                  </li>
-                ))}
-                {!logQ.data?.length && <li className="text-slate-500">{t('ctl.noLog')}</li>}
-              </ul>
-            </Panel>
-          </div>
-        </div>
+        <aside className="order-3 flex flex-col gap-3 lg:min-h-0 lg:overflow-y-auto lg:ps-1">
+          <Panel title={t('ctl.routes')} icon={<Droplets size={14} />}>
+            <div className="space-y-1.5">
+              {c.routes.map((r: any) => {
+                const color = r.stress_class === null ? '#64748b' : config.class_colors[r.stress_class];
+                return (
+                  <div key={r.route_id} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-2 text-sm" style={{ borderInlineStartColor: color, borderInlineStartWidth: 4 }}>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-semibold text-white">{r.label} <span className="text-xs font-normal text-slate-400">· {crop(r.crop)}</span></div>
+                      <div className="text-[11px] text-slate-400">
+                        {r.needs_water ? `${fmtNumber(r.need_m3_day, lang)} m³/j` : t('farm.noNeed')}
+                        {r.recommended && <span className="ms-1 rounded bg-emerald-500/20 px-1 text-emerald-200">{t('ctl.recommended')}</span>}
+                        {r.enabled && r.needs_water && !r.reachable && <span className="ms-1 text-amber-300">{t('farm.unreachable')}</span>}
+                        {r.flow_m3_h > 0 && <span className="ms-1 text-water-200">{fmtNumber(r.flow_m3_h, lang, 1)} m³/h</span>}
+                      </div>
+                    </div>
+                    <Switch on={r.enabled} disabled={busy} label={r.label} onChange={() => cmd.mutate({ path: `routes/${r.sub_zone_id}`, body: { enabled: !r.enabled } })} />
+                  </div>
+                );
+              })}
+            </div>
+          </Panel>
+        </aside>
       </div>
-      <p className="text-[11px] text-slate-500">{t('ctl.note')}</p>
+      <p className="shrink-0 text-[11px] text-slate-500">{t('ctl.note')}</p>
     </div>
   );
 }

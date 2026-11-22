@@ -112,6 +112,11 @@ export function LockTo({ ring, k }: { ring: LonLat[]; k: string }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, k]);
+  useEffect(() => {
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
   return null;
 }
 
