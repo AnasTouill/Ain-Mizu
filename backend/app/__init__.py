@@ -1,0 +1,1 @@
+"""Physarum-Grid backend (FastAPI)."""
