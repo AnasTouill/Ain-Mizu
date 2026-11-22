@@ -92,46 +92,46 @@ export default function FarmProfile() {
           </div>
         </Panel>
 
-        <section className="glass relative min-h-[52vh] overflow-hidden lg:min-h-0 lg:flex-1">
-        <MapContainer center={[farm.bounds[0][0], farm.bounds[0][1]]} zoom={14} zoomControl={false} className="h-full w-full" scrollWheelZoom>
-          <BaseTiles satellite={satellite} />
-          <ZoomControl position="bottomright" />
-          <FitTo k={farm.farm_id} ring={farm.boundary} lock />
-          <OutsideMask ring={farm.boundary} />
-          {farm.sub_zones.map((s) => {
-            const st = subState.get(s.sub_zone_id);
-            const c = st?.stress_class ?? null;
-            const stressColor = c === null ? '#64748b' : config.class_colors[c];
-            const fill = byStress ? stressColor : CATEGORY_COLORS[s.category];
-            return (
-              <Polygon key={s.sub_zone_id} positions={ll(s.polygon)} pathOptions={{ color: fill, weight: 2.5, fillColor: fill, fillOpacity: 0.5 }}>
-                <Tooltip direction="center" className="pg-tip">
-                  {s.name} · {optLabel(crop(s.crop), lang)} · {c === null ? t('class.na') : t(`class.${c}` as 'class.0')}
-                  {st?.needs_water ? ` · ${fmtNumber(st.need_m3_day, lang)} m³/j` : ''}
-                </Tooltip>
-              </Polygon>
-            );
-          })}
-          {obstacles && <ObstacleLayer zone={farm.zone} bbox={[farm.bounds[0][1], farm.bounds[0][0], farm.bounds[1][1], farm.bounds[1][0]]} />}
-          {network && <NetworkLayer data={network} showPruned={false} />}
-          <Polygon positions={ll(farm.boundary)} pathOptions={{ color: '#facc15', weight: 3, fillOpacity: 0, interactive: false }} />
-          {farm.water_sources.map((s) => (
-            <Marker key={s.source_id} position={[s.lat, s.lon]} icon={srcIcon(s.status === 'planned')}>
-              <Tooltip direction="top" offset={[0, -24]} className="pg-tip">{optLabel(opts.data?.source_types.find((x) => x.id === s.type), lang)}</Tooltip>
-            </Marker>
-          ))}
-        </MapContainer>
-        <div className="absolute end-3 top-3 z-[500] flex gap-2">
-          <button onClick={() => setObstacles(!obstacles)} className={`flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs ${obstacles ? 'border-red-400/50 bg-red-500/20 text-red-100' : 'border-white/10 bg-ink-950/85 text-slate-200'}`}>
-            <Mountain size={13} /> {t('obs.toggle')}
-          </button>
-          <button onClick={() => setByStress(!byStress)} className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-ink-950/85 px-2.5 py-1.5 text-xs text-slate-200">
-            <MapIcon size={13} /> {byStress ? t('profile.colorStress') : t('profile.colorCrop')}
-          </button>
-          <button onClick={() => setSatellite(!satellite)} className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-ink-950/85 px-2.5 py-1.5 text-xs text-slate-200">
-            <Satellite size={13} /> {satellite ? t('onb.mapPlan') : t('onb.mapSat')}
-          </button>
-        </div>
+        <section className="glass relative h-[52vh] min-h-[360px] overflow-hidden lg:h-auto lg:min-h-0 lg:flex-1">
+          <MapContainer center={[farm.bounds[0][0], farm.bounds[0][1]]} zoom={14} zoomControl={false} className="h-full w-full" scrollWheelZoom>
+            <BaseTiles satellite={satellite} />
+            <ZoomControl position="bottomright" />
+            <FitTo k={farm.farm_id} ring={farm.boundary} lock />
+            <OutsideMask ring={farm.boundary} />
+            {farm.sub_zones.map((s) => {
+              const st = subState.get(s.sub_zone_id);
+              const c = st?.stress_class ?? null;
+              const stressColor = c === null ? '#64748b' : config.class_colors[c];
+              const fill = byStress ? stressColor : CATEGORY_COLORS[s.category];
+              return (
+                <Polygon key={s.sub_zone_id} positions={ll(s.polygon)} pathOptions={{ color: fill, weight: 2.5, fillColor: fill, fillOpacity: 0.5 }}>
+                  <Tooltip direction="center" className="pg-tip">
+                    {s.name} · {optLabel(crop(s.crop), lang)} · {c === null ? t('class.na') : t(`class.${c}` as 'class.0')}
+                    {st?.needs_water ? ` · ${fmtNumber(st.need_m3_day, lang)} m³/j` : ''}
+                  </Tooltip>
+                </Polygon>
+              );
+            })}
+            {obstacles && <ObstacleLayer zone={farm.zone} bbox={[farm.bounds[0][1], farm.bounds[0][0], farm.bounds[1][1], farm.bounds[1][0]]} />}
+            {network && <NetworkLayer data={network} showPruned={false} />}
+            <Polygon positions={ll(farm.boundary)} pathOptions={{ color: '#facc15', weight: 3, fillOpacity: 0, interactive: false }} />
+            {farm.water_sources.map((s) => (
+              <Marker key={s.source_id} position={[s.lat, s.lon]} icon={srcIcon(s.status === 'planned')}>
+                <Tooltip direction="top" offset={[0, -24]} className="pg-tip">{optLabel(opts.data?.source_types.find((x) => x.id === s.type), lang)}</Tooltip>
+              </Marker>
+            ))}
+          </MapContainer>
+          <div className="absolute end-3 top-3 z-[500] flex gap-2">
+            <button onClick={() => setObstacles(!obstacles)} className={`flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs ${obstacles ? 'border-red-400/50 bg-red-500/20 text-red-100' : 'border-white/10 bg-ink-950/85 text-slate-200'}`}>
+              <Mountain size={13} /> {t('obs.toggle')}
+            </button>
+            <button onClick={() => setByStress(!byStress)} className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-ink-950/85 px-2.5 py-1.5 text-xs text-slate-200">
+              <MapIcon size={13} /> {byStress ? t('profile.colorStress') : t('profile.colorCrop')}
+            </button>
+            <button onClick={() => setSatellite(!satellite)} className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-ink-950/85 px-2.5 py-1.5 text-xs text-slate-200">
+              <Satellite size={13} /> {satellite ? t('onb.mapPlan') : t('onb.mapSat')}
+            </button>
+          </div>
         </section>
       </div>
 
