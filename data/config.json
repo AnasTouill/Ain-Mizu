@@ -1,0 +1,105 @@
+{
+  "zones": [
+    {
+      "id": "kairouan",
+      "name": "Kairouan",
+      "center": [
+        10.0428,
+        35.5991
+      ]
+    },
+    {
+      "id": "sidi_bouzid",
+      "name": "Sidi Bouzid",
+      "center": [
+        9.4725,
+        35.0511
+      ]
+    },
+    {
+      "id": "kebili",
+      "name": "Kébili",
+      "center": [
+        8.9512,
+        33.701
+      ]
+    }
+  ],
+  "months": {
+    "first_observed": "2022-11",
+    "last_observed": "2026-11",
+    "forecast_horizon": 1
+  },
+  "class_labels": [
+    "green",
+    "yellow",
+    "orange",
+    "red"
+  ],
+  "class_colors": [
+    "#2e9e4f",
+    "#f2c230",
+    "#f08a24",
+    "#d62f2f"
+  ],
+  "demand_weights": {
+    "green": 0.0,
+    "yellow": 0.5,
+    "orange": 0.8,
+    "red": 1.0
+  },
+  "class_thresholds": {
+    "note": "Real pipeline: z = (NDMI - field weekly normal) / field sd; cuts from 1D k-means (k=4) on deficits. Red also needs a deficit the week before and an NDVI drop > 0.03.",
+    "z_cuts": {
+      "jaune": -0.48,
+      "orange": -1.02,
+      "rouge": -1.76
+    }
+  },
+  "physarum": {
+    "gamma": 1.4,
+    "dt": 0.1,
+    "max_iterations": 200,
+    "tolerance": 0.0001,
+    "prune_threshold": 0.01,
+    "initial_conductivity": 1.0,
+    "flux_scale": 12.0
+  },
+  "edge_cost": {
+    "slope_penalty_a": 5.0,
+    "default_loss_rate": 0.08,
+    "existing_canal_factor": 0.6
+  },
+  "energy": {
+    "pump_kw": 15.0,
+    "kwh_per_m3": 0.357,
+    "pv_kwp": 24.0,
+    "pv_performance_ratio": 0.8,
+    "tank_capacity_m3": 500.0,
+    "tank_initial_frac": 0.35,
+    "station_share_of_demand": 0.08,
+    "irrigation_hours": [
+      5,
+      6,
+      7,
+      18,
+      19,
+      20,
+      21
+    ],
+    "note": "One representative solar pumping station per zone (pump + PV array + storage tank). The tank acts as a battery."
+  },
+  "ui": {
+    "default_zone": "kairouan",
+    "default_language": "fr"
+  },
+  "data_source": "pipeline",
+  "pipeline": {
+    "state_week": "2026-11-16",
+    "forecast_week": "2026-11-23",
+    "forecast_month_key": "2026-12",
+    "model": "LightGBM (NDMI next week)",
+    "imported_at": "2026-11-21 20:55",
+    "sources_hypothetical": true
+  }
+}
