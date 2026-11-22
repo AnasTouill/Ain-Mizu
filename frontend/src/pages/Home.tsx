@@ -75,12 +75,12 @@ export default function Home() {
             <p className="mt-4 max-w-xl text-base leading-relaxed" style={{ color: '#475569' }}>{t('home.lead')}</p>
             <div className="mt-6 flex flex-wrap gap-3">
               {user ? (
-                <button onClick={() => go('/profile')} className="group inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-white shadow-lg transition hover:-translate-y-0.5" style={{ background: NAVY }}>
+                <button onClick={() => go('/profile')} className="group inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-[#fff] shadow-lg transition hover:-translate-y-0.5" style={{ background: NAVY, color: '#fff' }}>
                   {t('home.ctaFarm')} <ArrowRight size={17} className="transition group-hover:translate-x-1 rtl:rotate-180" />
                 </button>
               ) : (
                 <>
-                  <button onClick={() => go('/login?register')} className="group inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-white shadow-lg transition hover:-translate-y-0.5" style={{ background: SUN }}>
+                  <button onClick={() => go('/login?register')} className="group inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-[#fff] shadow-lg transition hover:-translate-y-0.5" style={{ background: SUN, color: '#fff' }}>
                     {t('home.ctaStart')} <ArrowRight size={17} className="transition group-hover:translate-x-1 rtl:rotate-180" />
                   </button>
                   <button onClick={() => go('/login')} className="inline-flex items-center gap-2 rounded-full border-2 px-6 py-3 font-semibold transition hover:-translate-y-0.5" style={{ borderColor: NAVY, color: NAVY }}>
@@ -100,7 +100,7 @@ export default function Home() {
 
       {/* ------------------------------------------------ live figures */}
       <section className="mx-auto max-w-6xl px-4">
-        <div className="grid gap-3 rounded-3xl p-4 shadow-xl sm:grid-cols-2 lg:grid-cols-4" style={{ background: NAVY }}>
+        <div className="grid gap-3 rounded-3xl p-4 shadow-xl sm:grid-cols-2 lg:grid-cols-4" style={{ background: NAVY, color: '#fff' }}>
           {stats.map((s, i) => (
             <motion.div key={s.label} {...rise} transition={{ delay: i * 0.08 }} className="flex items-center gap-3 rounded-2xl p-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full" style={{ background: '#fff', color: s.color }}><s.icon size={22} /></div>
@@ -127,7 +127,7 @@ export default function Home() {
             <motion.div key={s.title} {...rise} transition={{ delay: i * 0.1 }} whileHover={{ y: -6 }}
               className="relative overflow-hidden rounded-3xl bg-white p-5 shadow-[0_12px_30px_-18px_rgba(29,53,87,0.45)]">
               <div className="absolute -end-3 -top-6 font-display text-[88px] font-bold leading-none" style={{ color: 'rgba(29,53,87,0.05)' }}>{i + 1}</div>
-              <div className="grid h-12 w-12 place-items-center rounded-2xl text-white" style={{ background: s.color }}><s.icon size={22} /></div>
+              <div className="grid h-12 w-12 place-items-center rounded-2xl text-[#fff]" style={{ background: s.color, color: '#fff' }}><s.icon size={22} /></div>
               <h3 className="mt-4 font-display text-lg font-bold" style={{ color: NAVY }}>{t(s.title)}</h3>
               <p className="mt-1 text-sm leading-relaxed" style={{ color: '#5b6b80' }}>{t(s.text)}</p>
             </motion.div>
@@ -181,13 +181,13 @@ export default function Home() {
       </section>
 
       {/* ------------------------------------------------ call to action */}
-      <section className="relative overflow-hidden px-4 py-12 text-center" style={{ background: NAVY }}>
+      <section className="relative overflow-hidden px-4 py-12 text-center" style={{ background: NAVY, color: '#fff' }}>
         <svg className="pointer-events-none absolute inset-x-0 bottom-0 h-16 w-full opacity-20" viewBox="0 0 600 60" preserveAspectRatio="none" aria-hidden>
           <path d="M0 40 Q 25 20 50 40 T 100 40 T 150 40 T 200 40 T 250 40 T 300 40 T 350 40 T 400 40 T 450 40 T 500 40 T 550 40 T 600 40 V60 H0Z" fill="#9cc3ea" />
         </svg>
         <motion.h2 {...rise} className="relative font-display text-3xl font-bold" style={{ color: '#fff' }}>{t('home.ctaTitle')}</motion.h2>
         <p className="relative mx-auto mt-2 max-w-xl text-sm" style={{ color: '#cbd5e1' }}>{t('home.ctaLead')}</p>
-        <button onClick={() => go(user ? '/profile' : '/login?register')} className="relative mt-6 inline-flex items-center gap-2 rounded-full px-7 py-3 font-semibold text-white shadow-lg transition hover:-translate-y-0.5" style={{ background: SUN }}>
+        <button onClick={() => go(user ? '/profile' : '/login?register')} className="relative mt-6 inline-flex items-center gap-2 rounded-full px-7 py-3 font-semibold text-[#fff] shadow-lg transition hover:-translate-y-0.5" style={{ background: SUN, color: '#fff' }}>
           {user ? t('home.ctaFarm') : t('home.ctaStart')} <ArrowRight size={17} className="rtl:rotate-180" />
         </button>
       </section>

@@ -79,32 +79,6 @@ export default function FarmProfile() {
               <button onClick={() => { window.location.hash = '/control'; }} className="btn-ghost min-w-0 px-2 text-xs"><Gauge size={14} /> {t('nav.control')}</button>
             </div>
           </div>
-          {plan.data && (
-            <div
-              className="mt-3 flex flex-wrap items-center gap-3 rounded-2xl p-3"
-              style={{ background: plan.data.summary.fields_need_water ? 'rgba(214,40,40,0.08)' : 'rgba(45,106,79,0.10)' }}
-            >
-              <div
-                className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-white"
-                style={{ background: plan.data.summary.fields_need_water ? '#d62828' : '#2d6a4f' }}
-              >
-                <Droplets size={20} />
-              </div>
-              <div className="min-w-[12rem] flex-1">
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('todo.title')}</div>
-                <div className="font-display text-base font-bold text-white">
-                  {plan.data.summary.fields_need_water
-                    ? t('todo.water', { n: plan.data.summary.fields_need_water, m3: fmtNumber(plan.data.summary.total_need_m3_day, lang), when: hourRanges(plan.data.summary.irrigation_hours) })
-                    : t('todo.none')}
-                </div>
-              </div>
-              {plan.data.summary.fields_need_water > 0 && (
-                <button onClick={() => { window.location.hash = '/control'; }} className="btn-primary px-4 text-sm">
-                  <Gauge size={15} /> {t('todo.go')}
-                </button>
-              )}
-            </div>
-          )}
           <button
             onClick={() => setShowStats((v) => !v)}
             aria-expanded={showStats}
