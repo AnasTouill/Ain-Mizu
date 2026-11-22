@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, Droplets, Leaf, Loader2, Sun, TrendingDown, TrendingUp, Zap } from 'lucide-react';
+import { BarChart3, Droplets, Leaf, Loader2, TrendingDown, TrendingUp } from 'lucide-react';
 import { Area, AreaChart, Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { api } from '../api/client';
 import { useConfig } from '../api/hooks';
@@ -32,14 +32,13 @@ export default function FarmStats() {
   const cards = [
     { icon: <Droplets size={16} />, v: `${fmtNumber(k.need_today_m3, lang)} m³`, l: t('stats.today'), sub: `${t('stats.nextWeek')} : ${fmtNumber(k.need_next_week_m3_day, lang)} m³/j` },
     { icon: <Leaf size={16} />, v: `${fmtNumber(k.water_saved_pct, lang, 1)} %`, l: t('stats.saved'), sub: `${fmtNumber(k.water_12m_m3 / 1000, lang)}k / ${fmtNumber(k.baseline_12m_m3 / 1000, lang)}k m³ (12 ${t('stats.months')})` },
-    { icon: <Sun size={16} />, v: `${fmtNumber(k.solar_share_pct, lang, 1)} %`, l: t('stats.solar'), sub: `${fmtNumber(k.pump_kwh_12m / 1000, lang)} MWh ${t('stats.pumping')}` },
     { icon: k.worsening_next > k.improving_next ? <TrendingDown size={16} /> : <TrendingUp size={16} />, v: `${k.worsening_next} ↘ · ${k.improving_next} ↗`, l: t('stats.outlook'), sub: t('stats.outlookSub') },
   ];
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-3 p-3 pb-10">
       <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-white"><BarChart3 className="text-water-300" /> {t('nav.stats')} · {farm?.name}</h1>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (
           <div key={c.l} className="glass p-4">
             <div className="label flex items-center gap-1.5">{c.icon} {c.l}</div>
@@ -81,22 +80,6 @@ export default function FarmStats() {
                 <Bar yAxisId="m3" dataKey="need_m3" fill="#38bdf8" name={t('stats.plan')} />
                 <Line yAxisId="mm" dataKey="rain_mm" stroke="#a78bfa" dot={false} name={t('stats.rain')} />
                 <Line yAxisId="mm" dataKey="et0_mm" stroke="#facc15" dot={false} name="ET0 (mm)" />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </Panel>
-
-        <Panel title={t('stats.energy')} icon={<Zap size={14} />}>
-          <div dir="ltr" className="h-56">
-            <ResponsiveContainer>
-              <ComposedChart data={s.demand} margin={{ left: 0, right: 8, top: 6 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" tickFormatter={fm} tick={{ fontSize: 10 }} minTickGap={20} />
-                <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
-                <Tooltip contentStyle={tip} labelFormatter={fm} formatter={(v: number) => `${fmtNumber(v, lang)} kWh`} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Bar dataKey="pump_kwh" fill="#f97316" name={t('stats.pumpKwh')} />
-                <Line dataKey="pv_kwh" stroke="#fde047" strokeWidth={2} dot={false} name={t('stats.pvKwh')} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
