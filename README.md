@@ -1,4 +1,4 @@
-# Physarum-Grid: web platform
+# Ain-mizu: web platform
 
 Decision-support platform (Kizuna @ ESPRIT) for Kairouan, Sidi Bouzid and Kebili. It has a FastAPI backend and a React 18 + TypeScript + Leaflet frontend with 3D views (react-three-fiber). It runs on **synthetic mock data** that follows ARCHITECTURE.md section 13. Real pipeline output can replace the files in `data/` (same names, same schemas) with no code change.
 
